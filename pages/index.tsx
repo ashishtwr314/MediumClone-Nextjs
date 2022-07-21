@@ -1,86 +1,114 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import type { NextPage } from "next";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 
-const Home: NextPage = () => {
+import Header from "../components/Header/Header";
+import { sanityClient, urlFor } from "../sanity";
+import { Posts } from "../typings";
+
+interface Props {
+  posts: [Posts];
+}
+
+const Home: NextPage = (props: Props) => {
+  const { posts } = props;
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+    <div className="">
       <Head>
-        <title>Create Next App</title>
+        <title>Medium Blog</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
+      <Header />
 
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      <div className="banner flex justify-between items-center bg-yellow-400 border-black border-y  py-10 lg:py-0 max-w-7xl mx-auto">
+        <div className="space-y-4 px-10">
+          <h1 className="text-6xl max-w-xl font-serif">
+            <span className="underline decoration-black decoration-4">
+              Medium
+            </span>{" "}
+            is a place to write, read, and connect
+          </h1>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Reprehenderit ipsum quasi similique perspiciatis sint officia fuga
+          </p>
         </div>
-      </main>
 
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
+        <div className="font-serif">
+          <img
+            className="hidden md:inline-flex h-32 lg:h-full"
+            src="https://accountabiLitylab.org/wp-content/uploads/2020/03/Medium-logo.png"
+          />
+        </div>
+      </div>
+
+      <div className="posts grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-7xl mx-auto my-10">
+        {posts.map((post) => (
+          <Link key={post._id} href={`/post/${post.slug.current}`}>
+            <div className="post border rounded-lg cursor-pointer group">
+              <div className="image overflow-hidden">
+                {post.mainImage ? (
+                  <img
+                    className="h-60 w-full object-cover group-hover:scale-105 transition-all duration-200 ease-in-out"
+                    src={
+                      urlFor(post.mainImage || null)
+                        .width(200)
+                        .url()!
+                    }
+                    alt="post-image"
+                  />
+                ) : (
+                  <div className="h-60 bg-gray-100"></div>
+                )}
+              </div>
+              <div className="flex justify-between px-5 py-3">
+                <div>
+                  <p className="text-xl font-bold">{post.title}</p>
+                  <p className="text-sm">By {post.author.name}</p>
+                </div>
+                <div>
+                  <img
+                    className="w-12 h-12 rounded-full"
+                    src={urlFor(post.author.image).width(200).url()}
+                    alt="post-author-image"
+                  />
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export const getServerSideProps = async (context) => {
+  const query = `
+    *[_type == "post"]{
+      _id,
+      _createdAt,
+      title,
+      mainImage,
+      description,
+      author -> {
+        name,
+        image
+      },
+      slug,
+      body
+    }
+  `;
+
+  const posts = await sanityClient.fetch(query);
+
+  console.log(posts);
+  return {
+    props: {
+      posts: posts,
+    },
+  };
+};
+
+export default Home;

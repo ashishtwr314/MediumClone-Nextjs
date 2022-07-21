@@ -1,3 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.ml-auto.high-specificity {
+  margin-left: auto !important;
+}
