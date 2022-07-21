@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import PortableText from "react-portable-text";
 import Header from "../../components/Header/Header";
 import { sanityClient, urlFor } from "../../sanity";
-import { Posts } from "../../typings";
+import { CommentResponseType, Posts } from "../../typings";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { CommentResponseType } from "../api/createComment";
 
 interface Props {
   post: Posts;
@@ -40,10 +39,10 @@ function Post(props: Props) {
       method: "POST",
       body: JSON.stringify(data),
     })
-      .then((res: CommentResponseType) => {
+      .then((res) => {
         return res.json();
       })
-      .then((res) => {
+      .then((res: CommentResponseType) => {
         if (res.err == false) {
           setSubmitted({ status: "success" });
         }
@@ -85,6 +84,7 @@ function Post(props: Props) {
           <PortableText
             projectId={process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}
             dataset={process.env.NEXT_PUBLIC_SANITY_DATASET}
+            //@ts-ignore: Unreachable code error
             content={post.body}
             serializers={{
               h1: (props: any) => (
@@ -222,7 +222,7 @@ export async function getStaticPaths() {
   };
 }
 
-export async function getStaticProps({ params }) {
+export async function getStaticProps({ params }: { params: { slug: string } }) {
   const query = `
             *[_type == "post" && slug.current == $slug][0]{
                 _id,

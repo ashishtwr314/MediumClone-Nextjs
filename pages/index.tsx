@@ -11,7 +11,7 @@ interface Props {
   posts: [Posts];
 }
 
-const Home: NextPage = (props: Props) => {
+const Home = (props: Props) => {
   const { posts } = props;
   return (
     <div className="">
@@ -84,7 +84,7 @@ const Home: NextPage = (props: Props) => {
   );
 };
 
-export const getServerSideProps = async (context) => {
+export const getServerSideProps = async (context: any) => {
   const query = `
     *[_type == "post"]{
       _id,

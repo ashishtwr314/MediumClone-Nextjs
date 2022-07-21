@@ -37,7 +37,7 @@ export default async function handler(
     res
       .status(200)
       .json({ err: false, message: "Comment Successfully created!" });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       err: true,
       message: err.message,
